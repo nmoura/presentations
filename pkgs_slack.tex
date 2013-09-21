@@ -1,0 +1,362 @@
+\documentclass{beamer}
+\usepackage[brazil]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\date{20 e 21 de Agosto de 2010}
+\usetheme{Goettingen}
+
+\begin{document}
+
+\title{Instalação e Gerenciamento de Pacotes no Slackware}
+
+\author[Nilton Moura]{por Nilton Moura}
+
+\institute{\\
+Apresentado no:\\
+Instituto Infnet\\
+no VI Slackware Show\\
+\url{http://slackshow.slackwarebrasil.org/}}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\section{Breve História}
+\begin{frame}
+	\frametitle{Breve História do Slackware}
+	\begin{itemize}
+		\item Patrick Volkerding precisava de um interpretador LISP para um
+			projeto. Começou então a aprender Linux com uma das raras
+			distribuições existentes, o \textit{SLS Linux}.
+		~\\
+		~\\
+		%\pause
+		\item Conforme utilizava, Patrick corrigia os bugs encontrados, porém
+			o mantenedor do SLS Linux (Peter MacDonald) não aceitou as
+			correções, então Patrick disponibilizou-as no ftp de sua
+			universidade.
+		~\\
+		~\\
+		%\pause
+		\item Com o passar do tempo o número de correções cresceu, ganhando
+			popularidade rapidamente. Patrick então lança para todo o mundo
+			em 17 de julho de 1993 o seu trabalho na versão 1.0 com o nome de
+			Slackware.
+	\end{itemize}
+\end{frame}
+
+\section{Filosofia}
+\begin{frame}
+	\frametitle{Filosofia do Slackware}
+		\begin{itemize}
+			\item O Slackware é a distribuição mais antiga em pleno
+				desenvolvimento até hoje, e tem a reputação de ser a mais
+				\textit{UNIX-like}. É a mais tradicional distribuição
+				linux.
+		\end{itemize}
+		%\pause
+		\begin{block}{Simplicidade e estabilidade}
+			\begin{itemize}
+				\item Não tenta ser um clone ou parecer com o Windows
+				\item Não tenta fantasiar/encobrir processos ~--- coloca o usuário
+					no controle permitindo-o que veja exatamente o que acontece
+				\item Configuração transparente ~--- arquivos de configuração bem
+					comentados
+				\item Cada aplicação é configurada de acordo com a intenção do
+					desenvolvedor da aplicação ~--- O Slackware não tem um arquivo
+					ou ferramenta de configuração "global"
+			\end{itemize}
+		\end{block}
+\end{frame}
+\begin{frame}
+	\frametitle{Filosofia do Slackware (cont.)}
+		\begin{block}{Simplicidade e estabilidade (cont.)}
+			\begin{itemize}
+				\item Modelo de desenvolvimento conservador ~--- os programas são
+					muito bem testados antes de entrarem ou substituirem outros,
+					mas o Slackware não utiliza versões antigas de software
+			\end{itemize}
+		\end{block}
+		%\pause
+		~\\
+		Slackware é para pessoas que gostam de aprender e ajustar seu sistema
+		para fazer exatamente o que eles querem. É por este motivo que as
+		pessoas o utilizam por vários anos, tanto para servidores robustos
+		quanto para seus desktops pessoais.
+\end{frame}
+
+\section{Desenvolvedores}
+\begin{frame}
+	\frametitle{Desenvolvedores do Slackware}
+	\footnotesize{
+	Patrick Volkerding ~--- volkerdi\@@ \\
+	Eric Hameleers ~--- alien\@@ \\
+	Piter PUNK ~--- piterpunk\@@ \\
+	Robby Workman ~--- rworkman\@@ \\
+	Alan Hicks ~--- alan\@@ \\
+	Amritpal Bath ~--- amrit\@@ \\
+	Erik Jan Tromp ~--- alphageek\@@ \\
+	Stuart Winter ~--- mozes\@@ \\
+	Karl Magnus Kolst\o ~--- karlmag\@@ \\
+	Leopold Midha ~--- netrixtardis\@@ \\
+	Mark Post ~--- markkp\@@ \\
+	John Jenkins ~--- mrgoblin\@@ \\
+	Vincent Batts ~--- vbatts\@@ \\
+	Fred Emmott ~--- fred\@@ \\
+	}
+	~\\
+	Existem outros desenvolvedores que preferem o anonimato por causa de seus
+	cargos em seus empregos ou algum outro motivo.	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Desenvolvedores do Slackware (cont.)}
+	\textbf{A comunidade de usuários} ~--- É ela quem contribui principalmente
+	com testes e reporte de bugs
+	~\\
+	~\\
+	%\pause
+	O que seria do Linux sem a comunidade de usuários?
+\end{frame}
+
+\section{Gerenciamento de Pacotes}
+\begin{frame}
+	\frametitle{Gerenciamento de Pacotes}
+	Um mito se fez quando a Red Hat lançou o RPM, que dizia que Slackware
+	não tinha gerenciamento de pacotes: a verdade é que têm mesmo antes
+	do Red Hat existir.
+	~\\
+	%\pause
+	\center{Gerenciamento de \textbf{pacotes} $\neq$ Checagem de \textbf{dependências}}
+	~\\
+	~\\
+	%\pause
+	\begin{block}{Utilitários}
+		\begin{itemize}
+			\item \texttt{pkgtool}
+			\item \texttt{installpkg}
+			\item \texttt{upgradepkg}
+			\item \texttt{removepkg}
+			\item \texttt{slackpkg}
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Utilitários para Gerenciamento de Pacotes}
+	Um pacote é um arquivo \textit{tar} comprimido com algum algoritmo de compressão
+	como gzip ou LZMA (xz) por exemplo.\\
+	%\pause
+
+	\begin{block}{Como funciona a instalação de um pacote?}
+	\begin{enumerate}
+		%\pause
+		\item O pacote é descompactado e extraído para o diretório raiz (/),
+			ou para outro, caso a variável \texttt{\$ROOT} for
+			setada.
+		%\pause
+		\item Se o pacote tiver o script de pós-instalação \textit{install/doinst.sh},
+			ele será executado.
+		%\pause
+		\item É criado um arquivo de log em /var/log/packages/ com o nome 
+			\small{\textit{NOME-VERSAO-ARCH-BUILD}}, com várias informações sobre o
+			pacote, incluindo a lista de arquivos instalados. Se o script
+			de pós-instalação \textit{doinst.sh} existir, ele será copiado
+			para /var/log/scripts com o mesmo nome do log.
+	\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Arquivos de um pacote}
+	\scriptsize{
+	\# \texttt{explodepkg btpd-0.15-x86\_64-1\_SBo.tgz\\
+	%\pause
+	Exploding package btpd-0.15-x86\_64-1\_SBo.tgz in current directory:\\
+	./\\
+	install/\\
+	install/slack-desc\\
+	usr/\\
+	usr/doc/\\
+	usr/doc/btpd-0.15/\\
+	usr/doc/btpd-0.15/CHANGES\\
+	usr/doc/btpd-0.15/README\\
+	usr/doc/btpd-0.15/btpd.SlackBuild\\
+	usr/doc/btpd-0.15/COPYRIGHT\\
+	usr/bin/\\
+	usr/bin/btinfo\\
+	usr/bin/btpd\\
+	usr/bin/btcli\\
+	}}
+	%\pause
+	\begin{block}{\bf{doinst.sh}}
+	O script \textit{doinst.sh} é utilizado para criar links simbólicos e fazer
+	comparações de arquivos pré-existentes (que podem ser customizados pelo
+	administrador do sistema) com arquivos que serão copiados, com auxílio do
+	\texttt{md5sum}. Normalmente arquivos de configuração e scripts de inicialização.
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exemplo de doinst.sh}
+	\scriptsize{
+	\tiny{
+	config() \{\\
+  	~~NEW="\$1"\\
+	~~OLD="\$(dirname \$NEW)/\$(basename \$NEW .new)"\\
+	~~\# If there's no config file by that name, mv it over:\\
+	~~if [ ! -r \$OLD ]; then\\
+	~~~~mv \$NEW \$OLD\\
+	~~elif [ "\$(cat \$OLD | md5sum)" = "\$(cat \$NEW | md5sum)" ]; then\\
+        ~~~~\# toss the redundant copy\\
+    	~~~~rm \$NEW\\
+  	~~fi\\
+  	~~\# Otherwise, we leave the .new copy for the admin to consider...\\
+\}\\
+~\\
+	\# Keep same perms on rc.mysqld.new:\\
+	if [ -e etc/rc.d/rc.mysqld ]; then\\
+	~~cp -a etc/rc.d/rc.mysqld etc/rc.d/rc.mysqld.new.incoming\\
+	~~cat etc/rc.d/rc.mysqld.new > etc/rc.d/rc.mysqld.new.incoming\\
+	~~mv etc/rc.d/rc.mysqld.new.incoming etc/rc.d/rc.mysqld.new\\
+	fi\\
+~\\
+	config etc/rc.d/rc.mysqld.new\\
+~\\
+	( cd usr/lib ; rm -rf libmysqlclient\_r.so.16 )\\
+	( cd usr/lib ; ln -sf mysql/libmysqlclient\_r.so.16 libmysqlclient\_r.so.16 )\\
+	( cd usr/lib/mysql ; rm -rf libmysqlclient\_r.so.16 )\\
+	( cd usr/lib/mysql ; ln -sf libmysqlclient\_r.so.16.0.0 libmysqlclient\_r.so.16 )\\
+	}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{slackpkg}
+	Ferramenta que automatiza o gerenciamento de pacotes criado pelo desenvolvedor
+	do Slackware Piter PUNK. Excelente para instalar ou atualizar pacotes pela
+	rede.\\
+	%\pause
+	~\\
+	\begin{block}{Algumas características}
+		\begin{itemize}
+			\item Busca arquivos específicos
+			\item Remove pacotes de terceiros
+			\item Instala novos pacotes
+			\item Atualiza pacotes instalados
+			\item etc.
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Exemplo de uso do slackpkg}
+	Como manter seu sistema atualizado com slackpkg:\\
+	~\\
+	\begin{enumerate}
+		%\pause
+		\item \texttt{\# slackpkg update}
+		%\pause
+		\item \texttt{\# slackpkg upgrade slackpkg}
+		%\pause
+		\item \texttt{\# slackpkg install-new}
+		%\pause
+		\item \texttt{\# slackpkg upgrade-all}
+		%\pause
+		\item \texttt{\# slackpkg clean-system}
+	~\\
+	~\\
+	Mais informações em \url{http://slackpkg.org/} ou "\texttt{man slackpkg}".
+	\end{enumerate}
+\end{frame}
+
+\section{Instalando outros softwares}
+\begin{frame}
+	\frametitle{Instalando outros softwares}
+	O Slackware vem com um conjunto de pacotes grande e variado, mas você pode
+	precisar de um software que não esteja incorporado à distribuição.
+	%\pause
+	~\\
+	\begin{block}{O que fazer?}
+		%\pause
+		\begin{itemize}
+			\item Procurar no Google o pacote compilado?
+		%\pause
+			\item \texttt{./configure \&\& make \&\& make install}?
+		\end{itemize}
+	\end{block}
+	%\pause
+	Além da segurança de um sistema, a forma como é instalado um software pode dar
+	muitas dores de cabeça. Compilar e instalar manualmente funciona, mas a manutenção
+	se torna cada vez mais difícil e trabalhosa. Problemas de compatibilidade com
+	algum pacote e dificuldade para remoção são alguns.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Fontes confiáveis}
+	Você pode baixar um pacote de sites cujo criador do pacote tenha boa
+	reputação na comunidade.\\
+	~\\
+	Alguns sites com pacotes compilados confiáveis:
+	~\\
+	\begin{itemize}
+		\tiny{
+		\item Eric Hameleers (alienBOB) ~--- \url{http://slackware.com/~alien/}
+		\item Robby Workman (rworkman) ~--- \url{http://rlworkman.net/pkgs/}
+		\item Erik Jan Tromp (alphageek) ~--- \url{http://alphageek.dyndns.org/}
+		\item Niels Horn ~--- \url{http://www.nielshorn.net/slackware/}}
+	\end{itemize}
+	~\\
+	Existem outros sites que reúnem pacotes de diversos autores, que também tem bons
+	pacotes, mas nem sempre se tem garantia de qualidade. É bom checar a reputação,
+	o próprio pacote, etc.
+\end{frame}
+
+\begin{frame}
+	\frametitle{SlackBuilds.org}
+	O projeto SlackBuilds.org é um repositório de uma grande coleção de scripts
+	SlackBuild escritos em sua maioria pela comunidade de usuários, fundado
+	e mantido por alguns membros do time de desenvolvimento do Slackware.\\
+	%\pause
+	~\\
+	O que é um script SlackBuild?\\
+	~\\
+	%\pause
+	É um shell script que automatiza o processo de configuração, compilação,
+	e criação do pacote a que ele foi preparado.
+	~\\
+	Site do projeto: \url{http://www.slackbuilds.org/}
+\end{frame}
+
+\begin{frame}
+	\frametitle{sbopkg}
+	O \textit{sbopkg} é uma ferramenta que sincroniza com o repositório
+	SlackBuilds.org, que tem diversas funcionalidades, como por exemplo,
+	instalar diversos softwares em apenas uma linha de comando.\\
+	~\\
+	Confira o projeto criado por Chess Griffin em: \url{http://www.sbopkg.org/}
+\end{frame}
+
+\section{Créditos e Agradecimentos}
+
+\begin{frame}
+	\frametitle{Créditos e Agradecimentos}
+	\begin{itemize}
+		\item A Deus acima de tudo
+		~\\
+		~\\
+		\item Ao Robby Workman por permitir que eu usasse sua
+			apresentação como base, principalmente em História e Filosofia:
+			\url{http://rlworkman.net/slackshowbrasil/}
+		~\\
+		~\\
+		\item Ao Alan Hicks e outros contribuintes do SlackBook que também foi
+			base para esta apresentação.
+		~\\
+		~\\
+		\item Aos que fizeram o V SlackShow acontecer, a minha gratidão
+			pela oportunidade de estar aqui.
+	\end{itemize}
+\end{frame}
+\end{document}
